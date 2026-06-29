@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Phaser Inertia: Tile-Based</title>
+    <style>
+        body { margin: 0; background: #222; display: flex; justify-content: center; align-items: center; height: 100vh; color: #fff; font-family: sans-serif; }
+        canvas { border: 2px solid #555; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        #info { position: absolute; top: 10px; text-align: center; pointer-events: none; }
+    </style>
+<script src="./map_gen.js" crossorigin="anonymous"></script>
+
+</head>
+<body>
+
+<div id="info">
+</div>
+
+<script>// --- Usage Example ---
+
+const width = 20;
+const height = 20;
+const diamonds = 5;
+const bombs = 16; // Configurable bombs
+
+const generator = new InertiaMapGenerator(width, height, diamonds, bombs);
+
+try {
+    const result = generator.generate();
+    
+    console.log("Generated Map (with Bombs):");
+    const map = []
+    var i = 0
+    result.map.forEach(row => {
+        map[i] = row.join('')
+        i = i + 1
+    });
+    console.log(map)    
+
+    console.log(`\nSolution Moves (${result.solution.length} steps):`);
+    result.solution.forEach((move, index) => {
+        console.log(`Move ${index + 1}: Slide ${move.direction} to (${move.to.x},${move.to.y})`);
+    });
+
+} catch (e) {
+    console.error(e.message);
+}   
+</script>
+</body>
