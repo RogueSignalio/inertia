@@ -12,7 +12,7 @@ class InertiaGame {
       // stop_image: './assets/mine.jpg',
       wall_image: './assets/wall.jpg',
       player_image: './assets/player.png',
-      gem_image: './assets/gem.png',
+      gem_image: './assets/blue.png',
       stop_image: './assets/stop.png',
       enable_restart: false,
       ...cfg
@@ -90,6 +90,7 @@ class InertiaScene extends Phaser.Scene {
       this.isSliding = false; // State tracker
       this.disabledStops = new Set();
 
+      // this.floors = this.physics.add.staticGroup();
       this.walls = this.physics.add.staticGroup();
       this.diamonds = this.physics.add.staticGroup();
       this.bombs = this.physics.add.staticGroup();
@@ -98,7 +99,7 @@ class InertiaScene extends Phaser.Scene {
       if (this.config.background_image) {
           this.background = this.add.image(0, 0, 'background')
             .setOrigin(0, 0)
-            .setDisplaySize(this.sys.canvas.width, this.sys.canvas.height);
+            .setDisplaySize(this.sys.canvas.width, this.sys.canvas.height)//.setTint(0xFFFFFF);
       }
       if (this.config.background_color) { this.cameras.main.setBackgroundColor(this.config.background_color); }
 
@@ -112,11 +113,12 @@ class InertiaScene extends Phaser.Scene {
 
             let f = this.add.image(posX, posY, 'floor');
             f.setDisplaySize(this.TILE_SIZE, this.TILE_SIZE);
-            f.setAlpha(0.25)
+            f.setAlpha(0.4)
 
             if (type === 'W') {
                 let s = this.walls.create(posX, posY, 'wall');
                 s.setDisplaySize(this.TILE_SIZE, this.TILE_SIZE);
+                s.setAlpha(0.7); s.setTint(0xFF0000); //s.setBlendMode(0)
                 s.body.setSize(this.TILE_SIZE, this.TILE_SIZE).setOffset(this.TILE_SIZE/2+cdiff,this.TILE_SIZE/2+cdiff);
                 // s.setAlpha(0.6)
             } else if (type === 'P') {
@@ -133,7 +135,19 @@ class InertiaScene extends Phaser.Scene {
                 this.totalDiamonds++;
                 s.setDisplaySize(this.TILE_SIZE, this.TILE_SIZE);
                 s.body.setSize(this.TILE_SIZE, this.TILE_SIZE).setOffset(this.TILE_SIZE/2+cdiff,this.TILE_SIZE/2+cdiff);
-                s.preFX.addShine(Phaser.Math.Between(5, 10) / 10, 0.5, 3, false);
+                s.preFX.addShine(Phaser.Math.Between(10, 20) / 10, 1.5, 3, false);
+                // 3. Tween the outerStrength to create a pulsing effect
+                // s.setTint(0xFFFFFF)
+                // s.setAlpha(0.5)
+                this.tweens.add({
+                    targets: s.preFX.addGlow(0xFFFFFF, 1, 0, false, 0.1, 10),
+                    outerStrength: 3,   // Maximum glow intensity
+                    innerStrength: 1,   // Maximum glow intensity
+                    yoyo: true,         // Reverse the tween
+                    repeat: -1,         // Loop indefinitely
+                    duration: Phaser.Math.Between(75, 100),     // Duration of one pulse cycle
+                    ease: 'Sine.easeInOut' // Smooth easing
+                });
             } else if (type === 'B') {
                 let s = this.bombs.create(posX, posY, 'bomb');
                 s.setDisplaySize(this.TILE_SIZE - 7, this.TILE_SIZE - 7);
@@ -142,17 +156,19 @@ class InertiaScene extends Phaser.Scene {
 
                 // 3. Tween the outerStrength to create a pulsing effect
                 this.tweens.add({
-                    targets: s.preFX.addGlow(0xffdd33, 4, 0, false, 0.1, 10),
+                    targets: s.preFX.addGlow(0xffdd33, 4, 4, false, 0.1, 10),
                     outerStrength: 8,   // Maximum glow intensity
+                    innerStrength: 0,   // Maximum glow intensity
                     yoyo: true,         // Reverse the tween
                     repeat: -1,         // Loop indefinitely
-                    duration: Phaser.Math.Between(450, 550),     // Duration of one pulse cycle
+                    duration: Phaser.Math.Between(650, 750),     // Duration of one pulse cycle
                     ease: 'Sine.easeInOut' // Smooth easing
                 });
             } else if (type === 'S') {
                 let s = this.stopTiles.create(posX, posY, 'stop');
+                // s.setTint(0xFFFFFF); s.setBlendMode(3)
                 s.setDisplaySize(this.TILE_SIZE, this.TILE_SIZE);
-                s.body.setSize(this.TILE_SIZE/1.5, this.TILE_SIZE/1.5).setOffset(this.TILE_SIZE/1.5+cdiff,this.TILE_SIZE/1.5+cdiff);
+                s.body.setSize(this.TILE_SIZE/2, this.TILE_SIZE/2).setOffset(this.TILE_SIZE/1.3+cdiff,this.TILE_SIZE/1.3+cdiff);
             }
         }
       });
@@ -263,14 +279,14 @@ class InertiaScene extends Phaser.Scene {
       text, {
         fontSize: '18px',
         fontStyle: 'bold',
-        fill: '#22ff88',
+        fill: '#FFFFFF',
         backgroundColor: '#000000',
         //stroke: '#ddaa00',
         //strokeThickness: 2,
         padding: { x: pad, y: pad/2 }
       }
     ).setOrigin(0.5,0.5).setAlpha(0.95);
-    this.texts[name].preFX.addGlow(0X00ff55, 8, 0, false);
+    this.texts[name].preFX.addGlow(0XFFFFFF, 8, 0, false);
     return this.texts[name]
   }
 
@@ -366,8 +382,9 @@ class InertiaScene extends Phaser.Scene {
         player.body.reset(snapX, snapY);
 
         // Visual feedback
-        player.setTint(0xffaa00);
-        this.time.delayedCall(100, () => { if(player.active) player.clearTint(); });
+        player.setTint(0xffffff);
+        player.setBlendMode(1);
+        this.time.delayedCall(100, () => { if(player.active) player.clearTint(); player.setBlendMode(0); });
     }
 
     handleStop(player, tile) {
@@ -420,7 +437,7 @@ class InertiaScene extends Phaser.Scene {
       this.bombs.setVisible(false)
       this.player.setVisible(false)
       this.walls.setVisible(false)
-      this.submit = `${this.cfg.seed}_${t.diamondsCollected}_${t.rowCount}`
+      this.submit = `${this.cfg.seed}_${this.diamondsCollected}_${this.rowCount}`
       if (this.cfg.win_callback) {
         this.cfg.win_callback(this);
       }
@@ -437,12 +454,14 @@ class InertiaScene extends Phaser.Scene {
         // this.statusText.style.color = "#ff0000";
         
         // Simple explosion effect
-        this.explode(player)
+        player.setTint(0xFF0000)
+        this.explode(player)        
         this.explode(bomb)
         this.time.delayedCall(2000, () => { this.scene.stop(); this.scene.start(); });
     }
 
     explode(object) {
+        object.setTint(0xff0000);
         const particles = this.add.particles(object.x, object.y, object.texture.key, {
             speed: 100,
             scale: { start: 0.5, end: 0 },
@@ -450,6 +469,5 @@ class InertiaScene extends Phaser.Scene {
             blendMode: 'ADD',
             lifespan: 1200,
         }).setDepth(11);      
-        object.setTint(0xffffff);
     }
 }

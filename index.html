@@ -6,38 +6,40 @@
     <style>
         body { margin: 0; background: #222; display: flex; justify-content: center; align-items: center; height: 100vh; color: #fff; font-family: sans-serif; }
         canvas { border: 2px solid #555; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-        #info { position: absolute; top: 10px; text-align: center; pointer-events: none; }
+        #game { position: absolute; top: 10px; text-align: center; }
     </style>
 <script src="https://cdn.jsdelivr.net/npm/phaser@v3.90.0/dist/phaser.min.js" crossorigin="anonymous"></script>
 <script src="./map_gen.js" crossorigin="anonymous"></script>
 <script src="./inertia.js" crossorigin="anonymous"></script>
 </head>
 <body>
-
-<div id="info">
+<div id="game" style="width:360px;height:360px;">
 </div>
 <script>
 
 let game = null
+let d_width = document.getElementById('game').clientWidth
+let d_height = document.getElementById('game').clientHeight
+
 const generator = new InertiaMapGenerator({
     rows: 12, columns: 12,
-    diamonds: 6, bombs: 12,
+    diamonds: 8, bombs: 19,
     diff_mod: 2.5, wipe_solution: false,
 });
 
 try {
     const result = generator.generate();
-    
     console.log(`\nSolution Moves (${result.solution.length} steps):`);
     result.solution.forEach((move, index) => {
         console.log(`Move ${index + 1}: Slide ${move.direction} to (${move.to.x},${move.to.y})`);
     });
+
     game = new InertiaGame({
             // tile_size: 32,
             map: result.map,
-            width: 336,
-            height: 336,
-            seed: 'quack'
+            width: d_width,
+            height: d_height,
+            seed: 'quack',
             win_callback: (t)=> {
                 console.log(`${t.submit}`)
             },
@@ -46,6 +48,7 @@ try {
         {
             type: Phaser.AUTO,
             backgroundColor: '#000000',
+            parent: 'game',
         }
     );
 
