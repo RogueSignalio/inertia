@@ -119,11 +119,12 @@ class InertiaScene extends Phaser.Scene {
                 let s = this.walls.create(posX, posY, 'wall');
                 s.setDisplaySize(this.TILE_SIZE, this.TILE_SIZE);
                 s.setAlpha(0.7); s.setTint(0xFF0000); //s.setBlendMode(0)
-                s.body.setSize(this.TILE_SIZE, this.TILE_SIZE).setOffset(this.TILE_SIZE/2+cdiff,this.TILE_SIZE/2+cdiff);
+                s.body.setSize(this.TILE_SIZE, this.TILE_SIZE)
+                .setOffset(this.TILE_SIZE/2+cdiff,this.TILE_SIZE/2+cdiff);
                 // s.setAlpha(0.6)
             } else if (type === 'P') {
                 this.player = this.physics.add.sprite(posX, posY, 'player');
-                this.player.body.setSize(this.TILE_SIZE - 4, this.TILE_SIZE - 4);
+                this.player.body.setSize(this.TILE_SIZE, this.TILE_SIZE);
                 this.player.setDisplaySize(this.TILE_SIZE, this.TILE_SIZE);
                 this.player.setCollideWorldBounds(true);
                 this.player.setDepth(10); // Ensure player is on top
@@ -194,8 +195,9 @@ class InertiaScene extends Phaser.Scene {
 
         // Calculate the coordinate of the NEXT tile center in the movement direction
         // We add a small buffer (e.g., 10 pixels) to check slightly ahead of the player's center
-        const checkX = this.player.x + (dirX * (this.TILE_SIZE / 2 + 5));
-        const checkY = this.player.y + (dirY * (this.TILE_SIZE / 2 + 5));
+        const adjuster = this.player.displayWidth/6
+        const checkX = this.player.x + (dirX * (this.TILE_SIZE / 2 + adjuster)); //(this.player.setDisplaySize/6)));
+        const checkY = this.player.y + (dirY * (this.TILE_SIZE / 2 + adjuster)); //(this.player.setDisplaySize/6)));
         const distance = Phaser.Math.Distance.Between(checkX, checkY, obj.x, obj.y)
         if (distance > (this.TILE_SIZE/2 - 2)) {
             return false
